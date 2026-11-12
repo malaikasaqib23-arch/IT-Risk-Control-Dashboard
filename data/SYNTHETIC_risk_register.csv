@@ -1,0 +1,20 @@
+﻿risk_id,control_id,risk_description,category,likelihood,impact,risk_score,risk_level,owner,treatment_plan,status,review_date
+RISK-001,CTRL-001,SYNTHETIC risk associated with Inventory of information and other associated assets,IT Security,5,3,15,High,IT Asset Management,Review control evidence and remediate weaknesses,Open,2026-11-30
+RISK-002,CTRL-002,SYNTHETIC risk associated with Access control,IT Security,1,5,5,Medium,Identity & Access Management,Review control evidence and remediate weaknesses,Open,2026-11-30
+RISK-003,CTRL-003,SYNTHETIC risk associated with Information security in supplier relationships,IT Security,2,4,8,Medium,Vendor Risk Management,Review control evidence and remediate weaknesses,Open,2026-11-30
+RISK-004,CTRL-004,SYNTHETIC risk associated with Information security incident management planning and preparation,IT Security,5,4,20,Critical,SOC / Incident Response,Review control evidence and remediate weaknesses,In Progress,2026-11-30
+RISK-005,CTRL-005,SYNTHETIC risk associated with Response to information security incidents,IT Security,1,5,5,Medium,SOC / Incident Response,Review control evidence and remediate weaknesses,Open,2026-11-30
+RISK-006,CTRL-006,SYNTHETIC risk associated with ICT readiness for business continuity,IT Security,3,5,15,High,IT Continuity Team,Review control evidence and remediate weaknesses,Open,2026-11-30
+RISK-007,CTRL-007,"SYNTHETIC risk associated with Information security awareness, education and training",IT Security,5,3,15,High,Security Awareness / HR,Review control evidence and remediate weaknesses,Open,2026-11-30
+RISK-008,CTRL-008,SYNTHETIC risk associated with Physical security monitoring,IT Security,5,4,20,Critical,Facilities Security,Review control evidence and remediate weaknesses,In Progress,2026-11-30
+RISK-009,CTRL-009,SYNTHETIC risk associated with Privileged access rights,IT Security,5,5,25,Critical,Identity & Access Management,Review control evidence and remediate weaknesses,Open,2026-11-30
+RISK-010,CTRL-010,SYNTHETIC risk associated with Secure authentication,IT Security,4,5,20,Critical,Identity & Access Management,Review control evidence and remediate weaknesses,Open,2026-11-30
+RISK-011,CTRL-011,SYNTHETIC risk associated with Protection against malware,IT Security,3,5,15,High,Endpoint Security,Review control evidence and remediate weaknesses,Open,2026-11-30
+RISK-012,CTRL-012,SYNTHETIC risk associated with Management of technical vulnerabilities,IT Security,5,5,25,Critical,Vulnerability Management,Review control evidence and remediate weaknesses,In Progress,2026-11-30
+RISK-013,CTRL-013,SYNTHETIC risk associated with Configuration management,IT Security,3,4,12,High,IT Infrastructure,Review control evidence and remediate weaknesses,Open,2026-11-30
+RISK-014,CTRL-014,SYNTHETIC risk associated with Information backup,IT Security,5,5,25,Critical,IT Operations,Review control evidence and remediate weaknesses,Open,2026-11-30
+RISK-015,CTRL-015,SYNTHETIC risk associated with Logging,IT Security,5,4,20,Critical,SOC / Security Engineering,Review control evidence and remediate weaknesses,Open,2026-11-30
+RISK-016,CTRL-016,SYNTHETIC risk associated with Monitoring activities,IT Security,5,4,20,Critical,SOC,Review control evidence and remediate weaknesses,In Progress,2026-11-30
+RISK-017,CTRL-017,SYNTHETIC risk associated with Networks security,IT Security,5,5,25,Critical,Network Security,Review control evidence and remediate weaknesses,Open,2026-11-30
+RISK-018,CTRL-018,SYNTHETIC risk associated with Use of cryptography,IT Security,5,5,25,Critical,Security Engineering,Review control evidence and remediate weaknesses,Open,2026-11-30
+RISK-019,CTRL-019,SYNTHETIC risk associated with Change management,IT Security,5,4,20,Critical,IT Change Management,Review control evidence and remediate weaknesses,Open,2026-11-30

@@ -1,0 +1,111 @@
+﻿incident_id,control_id,incident_date,incident_type,severity,description,assigned_team,status,resolved_date
+INC-0001,CTRL-007,2026-09-22,Service Disruption,Critical,SYNTHETIC medium security event for dashboard testing,Synthetic SOC,Open,
+INC-0002,CTRL-009,2026-09-19,Data Exposure,High,SYNTHETIC high security event for dashboard testing,Synthetic SOC,Closed,2026-10-08
+INC-0003,CTRL-010,2026-09-09,Malware,High,SYNTHETIC high security event for dashboard testing,Synthetic SOC,In Progress,
+INC-0004,,2026-09-17,Malware,High,SYNTHETIC high security event for dashboard testing,Synthetic SOC,In Progress,
+INC-0005,CTRL-009,2026-09-12,Unauthorized Access,Low,SYNTHETIC low security event for dashboard testing,Synthetic SOC,Closed,2026-10-02
+INC-0006,CTRL-012,2026-09-21,Service Disruption,High,SYNTHETIC high security event for dashboard testing,Synthetic SOC,Open,
+INC-0007,CTRL-015,2026-09-13,Data Exposure,Medium,SYNTHETIC medium security event for dashboard testing,Synthetic SOC,Resolved,2026-09-16
+INC-0008,CTRL-008,2026-09-20,Service Disruption,Medium,SYNTHETIC medium security event for dashboard testing,Synthetic SOC,Resolved,2026-10-04
+INC-0009,CTRL-009,2026-09-15,Malware,Low,SYNTHETIC low security event for dashboard testing,Synthetic SOC,Resolved,2026-09-30
+INC-0010,CTRL-009,2026-09-06,Unauthorized Access,Critical,SYNTHETIC critical security event for dashboard testing,Synthetic SOC,Resolved,2026-09-21
+INC-0011,CTRL-014,2026-09-07,Suspicious Activity,Medium,SYNTHETIC medium security event for dashboard testing,Synthetic SOC,Closed,2026-09-09
+INC-0012,CTRL-018,2026-09-27,Configuration Issue,Low,SYNTHETIC low security event for dashboard testing,Synthetic SOC,Open,
+INC-0013,CTRL-007,2026-09-27,Malware,High,SYNTHETIC high security event for dashboard testing,Synthetic SOC,Resolved,2026-10-11
+INC-0014,,2026-09-10,Malware,Low,SYNTHETIC low security event for dashboard testing,Synthetic SOC,Closed,2026-09-15
+INC-0015,CTRL-007,2026-09-21,Malware,Medium,SYNTHETIC medium security event for dashboard testing,Synthetic SOC,Open,
+INC-0016,CTRL-012,2026-09-20,Service Disruption,Low,SYNTHETIC low security event for dashboard testing,Synthetic SOC,Closed,2026-09-29
+INC-0017,,2026-09-23,Suspicious Activity,High,SYNTHETIC high security event for dashboard testing,Synthetic SOC,Resolved,2026-10-06
+INC-0018,CTRL-010,2026-09-16,Unauthorized Access,High,SYNTHETIC high security event for dashboard testing,Synthetic SOC,Closed,2026-09-30
+INC-0019,CTRL-016,2026-09-26,Suspicious Activity,Low,SYNTHETIC low security event for dashboard testing,Synthetic SOC,Resolved,2026-10-05
+INC-0020,CTRL-016,2026-09-18,Configuration Issue,Medium,SYNTHETIC medium security event for dashboard testing,Synthetic SOC,Closed,2026-10-06
+INC-0021,CTRL-008,2026-09-29,Configuration Issue,High,SYNTHETIC high security event for dashboard testing,Synthetic SOC,In Progress,
+INC-0022,CTRL-012,2026-09-16,Data Exposure,Critical,SYNTHETIC critical security event for dashboard testing,Synthetic SOC,Resolved,2026-09-26
+INC-0023,CTRL-016,2026-09-28,Unauthorized Access,Critical,SYNTHETIC critical security event for dashboard testing,Synthetic SOC,Closed,2026-10-01
+INC-0024,CTRL-009,2026-09-30,Data Exposure,High,SYNTHETIC high security event for dashboard testing,Synthetic SOC,Resolved,2026-10-15
+INC-0025,CTRL-006,2026-10-30,Suspicious Activity,High,SYNTHETIC high security event for dashboard testing,Synthetic SOC,In Progress,
+INC-0026,CTRL-019,2026-07-17,Service Disruption,High,SYNTHETIC high security event for dashboard testing,Synthetic SOC,Resolved,2026-07-26
+INC-0027,CTRL-015,2026-06-07,Service Disruption,Medium,SYNTHETIC medium security event for dashboard testing,Synthetic SOC,Closed,2026-06-16
+INC-0028,CTRL-016,2026-05-08,Service Disruption,Low,SYNTHETIC low security event for dashboard testing,Synthetic SOC,Resolved,2026-05-15
+INC-0029,CTRL-004,2026-09-05,Configuration Issue,Medium,SYNTHETIC medium security event for dashboard testing,Synthetic SOC,Open,
+INC-0030,CTRL-012,2025-11-28,Configuration Issue,High,SYNTHETIC high security event for dashboard testing,Synthetic SOC,Open,
+INC-0031,CTRL-009,2026-02-20,Malware,Low,SYNTHETIC low security event for dashboard testing,Synthetic SOC,Closed,2026-03-01
+INC-0032,CTRL-019,2025-12-08,Unauthorized Access,Low,SYNTHETIC low security event for dashboard testing,Synthetic SOC,In Progress,
+INC-0033,CTRL-001,2026-02-24,Service Disruption,Medium,SYNTHETIC medium security event for dashboard testing,Synthetic SOC,Resolved,2026-03-06
+INC-0034,CTRL-012,2025-12-23,Suspicious Activity,Medium,SYNTHETIC medium security event for dashboard testing,Synthetic SOC,Closed,2025-12-27
+INC-0035,CTRL-009,2025-11-30,Unauthorized Access,Medium,SYNTHETIC medium security event for dashboard testing,Synthetic SOC,Resolved,2025-12-01
+INC-0036,CTRL-004,2026-02-15,Unauthorized Access,High,SYNTHETIC high security event for dashboard testing,Synthetic SOC,Resolved,2026-03-01
+INC-0037,CTRL-018,2026-09-24,Data Exposure,Critical,SYNTHETIC critical security event for dashboard testing,Synthetic SOC,Resolved,2026-10-08
+INC-0038,CTRL-009,2026-02-07,Malware,Medium,SYNTHETIC medium security event for dashboard testing,Synthetic SOC,Open,
+INC-0039,CTRL-009,2026-05-14,Configuration Issue,Low,SYNTHETIC low security event for dashboard testing,Synthetic SOC,Resolved,2026-05-15
+INC-0040,CTRL-012,2026-07-15,Suspicious Activity,Medium,SYNTHETIC medium security event for dashboard testing,Synthetic SOC,Open,
+INC-0041,CTRL-009,2026-01-06,Configuration Issue,High,SYNTHETIC high security event for dashboard testing,Synthetic SOC,Open,
+INC-0042,CTRL-007,2025-12-07,Malware,High,SYNTHETIC high security event for dashboard testing,Synthetic SOC,Open,
+INC-0043,CTRL-008,2026-10-02,Suspicious Activity,Medium,SYNTHETIC medium security event for dashboard testing,Synthetic SOC,Open,
+INC-0044,CTRL-016,2026-06-12,Unauthorized Access,High,SYNTHETIC high security event for dashboard testing,Synthetic SOC,Resolved,2026-06-13
+INC-0045,CTRL-009,2026-08-04,Malware,Medium,SYNTHETIC medium security event for dashboard testing,Synthetic SOC,Resolved,2026-08-23
+INC-0046,CTRL-012,2026-04-10,Suspicious Activity,Low,SYNTHETIC low security event for dashboard testing,Synthetic SOC,Resolved,2026-04-20
+INC-0047,CTRL-009,2026-01-11,Suspicious Activity,Low,SYNTHETIC low security event for dashboard testing,Synthetic SOC,Closed,2026-01-25
+INC-0048,CTRL-013,2026-06-19,Configuration Issue,Low,SYNTHETIC low security event for dashboard testing,Synthetic SOC,Closed,2026-06-27
+INC-0049,CTRL-012,2026-08-29,Unauthorized Access,High,SYNTHETIC high security event for dashboard testing,Synthetic SOC,In Progress,
+INC-0050,CTRL-015,2026-08-14,Malware,High,SYNTHETIC high security event for dashboard testing,Synthetic SOC,Open,
+INC-0051,CTRL-012,2026-01-18,Data Exposure,Medium,SYNTHETIC medium security event for dashboard testing,Synthetic SOC,Open,
+INC-0052,CTRL-012,2026-03-23,Data Exposure,Low,SYNTHETIC low security event for dashboard testing,Synthetic SOC,Resolved,2026-03-28
+INC-0053,CTRL-015,2026-01-14,Suspicious Activity,Low,SYNTHETIC low security event for dashboard testing,Synthetic SOC,Closed,2026-01-16
+INC-0054,CTRL-017,2026-09-10,Suspicious Activity,Low,SYNTHETIC low security event for dashboard testing,Synthetic SOC,Resolved,2026-09-11
+INC-0055,CTRL-009,2026-04-05,Service Disruption,Medium,SYNTHETIC medium security event for dashboard testing,Synthetic SOC,Resolved,2026-04-10
+INC-0056,CTRL-001,2025-12-26,Suspicious Activity,Medium,SYNTHETIC medium security event for dashboard testing,Synthetic SOC,Resolved,2026-01-05
+INC-0057,CTRL-003,2026-05-31,Unauthorized Access,High,SYNTHETIC high security event for dashboard testing,Synthetic SOC,Resolved,2026-06-05
+INC-0058,CTRL-019,2026-08-22,Malware,High,SYNTHETIC high security event for dashboard testing,Synthetic SOC,In Progress,
+INC-0059,CTRL-016,2026-01-13,Unauthorized Access,Low,SYNTHETIC low security event for dashboard testing,Synthetic SOC,Open,
+INC-0060,CTRL-009,2026-05-03,Suspicious Activity,Medium,SYNTHETIC medium security event for dashboard testing,Synthetic SOC,Resolved,2026-05-21
+INC-0061,CTRL-007,2026-03-08,Suspicious Activity,High,SYNTHETIC high security event for dashboard testing,Synthetic SOC,Resolved,2026-03-19
+INC-0062,CTRL-012,2026-01-01,Service Disruption,Medium,SYNTHETIC medium security event for dashboard testing,Synthetic SOC,Open,
+INC-0063,CTRL-012,2026-05-15,Configuration Issue,Critical,SYNTHETIC critical security event for dashboard testing,Synthetic SOC,Closed,2026-05-17
+INC-0064,CTRL-018,2026-04-01,Data Exposure,Low,SYNTHETIC low security event for dashboard testing,Synthetic SOC,In Progress,
+INC-0065,CTRL-017,2026-01-08,Service Disruption,High,SYNTHETIC high security event for dashboard testing,Synthetic SOC,Resolved,2026-01-22
+INC-0066,CTRL-015,2026-10-21,Unauthorized Access,Medium,SYNTHETIC medium security event for dashboard testing,Synthetic SOC,Resolved,2026-10-24
+INC-0067,CTRL-018,2026-07-12,Configuration Issue,Low,SYNTHETIC low security event for dashboard testing,Synthetic SOC,Closed,2026-07-18
+INC-0068,CTRL-016,2026-07-12,Suspicious Activity,High,SYNTHETIC high security event for dashboard testing,Synthetic SOC,Resolved,2026-07-17
+INC-0069,CTRL-011,2026-10-17,Malware,Medium,SYNTHETIC medium security event for dashboard testing,Synthetic SOC,Resolved,2026-10-29
+INC-0070,,2026-06-30,Configuration Issue,High,SYNTHETIC high security event for dashboard testing,Synthetic SOC,Resolved,2026-07-14
+INC-0071,,2026-05-07,Service Disruption,Medium,SYNTHETIC medium security event for dashboard testing,Synthetic SOC,Open,
+INC-0072,CTRL-008,2026-03-22,Malware,Medium,SYNTHETIC medium security event for dashboard testing,Synthetic SOC,Resolved,2026-04-05
+INC-0073,CTRL-004,2026-02-05,Suspicious Activity,Medium,SYNTHETIC medium security event for dashboard testing,Synthetic SOC,Closed,2026-02-11
+INC-0074,CTRL-014,2026-08-28,Data Exposure,High,SYNTHETIC high security event for dashboard testing,Synthetic SOC,Resolved,2026-09-11
+INC-0075,CTRL-009,2026-07-24,Unauthorized Access,Medium,SYNTHETIC medium security event for dashboard testing,Synthetic SOC,Resolved,2026-07-25
+INC-0076,CTRL-019,2026-09-24,Malware,High,SYNTHETIC high security event for dashboard testing,Synthetic SOC,Closed,2026-10-06
+INC-0077,,2026-03-20,Unauthorized Access,Low,SYNTHETIC low security event for dashboard testing,Synthetic SOC,Resolved,2026-03-23
+INC-0078,CTRL-012,2025-11-19,Data Exposure,Medium,SYNTHETIC medium security event for dashboard testing,Synthetic SOC,Resolved,2025-12-03
+INC-0079,CTRL-016,2026-07-19,Configuration Issue,Medium,SYNTHETIC medium security event for dashboard testing,Synthetic SOC,Resolved,2026-07-24
+INC-0080,CTRL-019,2025-11-14,Data Exposure,Medium,SYNTHETIC medium security event for dashboard testing,Synthetic SOC,Resolved,2025-12-03
+INC-0081,CTRL-019,2026-06-15,Configuration Issue,Low,SYNTHETIC low security event for dashboard testing,Synthetic SOC,Open,
+INC-0082,CTRL-006,2025-12-05,Service Disruption,Medium,SYNTHETIC medium security event for dashboard testing,Synthetic SOC,In Progress,
+INC-0083,,2026-06-09,Unauthorized Access,High,SYNTHETIC high security event for dashboard testing,Synthetic SOC,Open,
+INC-0084,,2026-07-14,Malware,High,SYNTHETIC high security event for dashboard testing,Synthetic SOC,Open,
+INC-0085,CTRL-009,2026-09-02,Unauthorized Access,High,SYNTHETIC high security event for dashboard testing,Synthetic SOC,Open,
+INC-0086,CTRL-007,2026-06-08,Suspicious Activity,Low,SYNTHETIC low security event for dashboard testing,Synthetic SOC,Resolved,2026-06-09
+INC-0087,CTRL-019,2025-11-20,Unauthorized Access,Low,SYNTHETIC low security event for dashboard testing,Synthetic SOC,Resolved,2025-11-25
+INC-0088,CTRL-019,2026-10-05,Data Exposure,Medium,SYNTHETIC medium security event for dashboard testing,Synthetic SOC,Resolved,2026-10-16
+INC-0089,CTRL-015,2026-03-03,Suspicious Activity,High,SYNTHETIC high security event for dashboard testing,Synthetic SOC,Closed,2026-03-16
+INC-0090,CTRL-012,2025-12-20,Malware,High,SYNTHETIC high security event for dashboard testing,Synthetic SOC,Open,
+INC-0091,CTRL-011,2026-07-06,Configuration Issue,High,SYNTHETIC high security event for dashboard testing,Synthetic SOC,Resolved,2026-07-17
+INC-0092,CTRL-019,2026-05-29,Data Exposure,Medium,SYNTHETIC medium security event for dashboard testing,Synthetic SOC,In Progress,
+INC-0093,,2025-11-19,Malware,Medium,SYNTHETIC medium security event for dashboard testing,Synthetic SOC,Open,
+INC-0094,,2026-02-05,Configuration Issue,Medium,SYNTHETIC medium security event for dashboard testing,Synthetic SOC,Closed,2026-02-15
+INC-0095,,2026-06-03,Malware,Medium,SYNTHETIC medium security event for dashboard testing,Synthetic SOC,Open,
+INC-0096,CTRL-019,2026-02-14,Suspicious Activity,Low,SYNTHETIC low security event for dashboard testing,Synthetic SOC,Open,
+INC-0097,,2026-03-13,Unauthorized Access,Medium,SYNTHETIC medium security event for dashboard testing,Synthetic SOC,Resolved,2026-03-19
+INC-0098,,2026-05-07,Suspicious Activity,Medium,SYNTHETIC medium security event for dashboard testing,Synthetic SOC,In Progress,
+INC-0099,CTRL-014,2025-11-15,Data Exposure,Low,SYNTHETIC low security event for dashboard testing,Synthetic SOC,Closed,2025-11-27
+INC-0100,CTRL-009,2026-05-21,Service Disruption,Medium,SYNTHETIC medium security event for dashboard testing,Synthetic SOC,Resolved,2026-05-29
+INC-0101,CTRL-001,2026-02-04,Malware,Low,SYNTHETIC low security event for dashboard testing,Synthetic SOC,In Progress,
+INC-0102,CTRL-004,2026-08-02,Malware,High,SYNTHETIC high security event for dashboard testing,Synthetic SOC,Open,
+INC-0103,,2026-04-10,Configuration Issue,Critical,SYNTHETIC critical security event for dashboard testing,Synthetic SOC,Resolved,2026-04-20
+INC-0104,CTRL-012,2026-07-13,Service Disruption,Medium,SYNTHETIC medium security event for dashboard testing,Synthetic SOC,Resolved,2026-07-23
+INC-0105,CTRL-008,2026-02-20,Malware,High,SYNTHETIC high security event for dashboard testing,Synthetic SOC,Closed,2026-03-03
+INC-0106,CTRL-016,2026-01-05,Service Disruption,Medium,SYNTHETIC medium security event for dashboard testing,Synthetic SOC,Open,
+INC-0107,,2026-06-16,Malware,Critical,SYNTHETIC critical security event for dashboard testing,Synthetic SOC,In Progress,
+INC-0108,CTRL-013,2026-09-05,Suspicious Activity,Low,SYNTHETIC low security event for dashboard testing,Synthetic SOC,In Progress,
+INC-0109,CTRL-008,2026-07-04,Configuration Issue,High,SYNTHETIC high security event for dashboard testing,Synthetic SOC,Resolved,2026-07-21
+INC-0110,CTRL-012,2026-08-31,Service Disruption,Medium,SYNTHETIC medium security event for dashboard testing,Synthetic SOC,Resolved,2026-09-06

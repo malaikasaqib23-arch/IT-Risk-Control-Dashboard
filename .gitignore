@@ -1,0 +1,26 @@
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+
+# Private files and secrets
+.env
+.env.*
+!.env.example
+.streamlit/secrets.toml
+*.pem
+*.key
+*answer_key*
+PRIVATE_*
+
+# Temporary and editor files
+.vscode/
+.idea/
+*.tmp
+*.bak
+~$*
+Thumbs.db
+.DS_Store

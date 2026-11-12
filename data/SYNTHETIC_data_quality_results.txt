@@ -1,0 +1,21 @@
+PASS | controls unique, nonempty PK
+PASS | tests unique, nonempty PK
+PASS | incidents unique, nonempty PK
+PASS | risks unique, nonempty PK
+PASS | tests valid control FK
+PASS | incidents valid control FK
+PASS | risks valid control FK
+PASS | test result allowed
+PASS | remediation status allowed
+PASS | incident severity allowed
+PASS | incident status allowed
+PASS | risk ratings in 1..5
+PASS | risk scores match
+PASS | risk bands match
+PASS | tests valid historical dates
+PASS | incidents valid historical dates
+PASS | resolved incidents have resolved date
+PASS | open incidents have no resolved date
+PASS | required evidence present
+PASS | historical tests preserved
+PASS | data volume
