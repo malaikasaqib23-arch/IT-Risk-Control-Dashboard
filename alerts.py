@@ -3,6 +3,8 @@
 
 import pandas as pd
 
+from monitoring import normalized, OPEN
+
 
 def consecutive_failures(tests, report_date):
     """Return control IDs whose two latest tests both failed."""
@@ -42,3 +44,42 @@ def consecutive_failures(tests, report_date):
         &
         summary["fail_count"].eq(2)
     ].index.tolist()
+
+
+def missing_risk_owners(risks):
+    """Open High/Critical records with a blank risk owner (no control-owner fallback)."""
+    return risks.loc[normalized(risks["status"]).isin(OPEN)
+                     & risks["risk_level"].isin(["High", "Critical"])
+                     & normalized(risks["owner"]).eq("")].copy()
+
+
+def incident_spikes(incidents, report_date, observation_start, multiplier=2.0, minimum=10):
+    """Full months only; >= minimum and >= multiplier times previous 3-month mean.
+
+    Design choices pending supervisor approval. Use full observed history before
+    applying the UI event range to the returned month, so filters do not change
+    the reference average. Months without three fully observed predecessors skip.
+    """
+    if multiplier <= 1 or minimum < 1:
+        raise ValueError("Spike multiplier must exceed 1 and minimum must be positive")
+    end = pd.Timestamp(report_date).normalize()
+    start = pd.Timestamp(observation_start).normalize()
+    first = start.to_period("M")
+    if start.day != 1:
+        first += 1
+    last = end.to_period("M")
+    if end < last.end_time.normalize():
+        last -= 1
+    periods = pd.period_range(first, last, freq="M")
+    dates = pd.to_datetime(incidents["incident_date"])
+    counts = dates.loc[dates.between(start, end)].dt.to_period("M").value_counts().reindex(periods, fill_value=0)
+    rows = []
+    for i in range(3, len(periods)):
+        previous = counts.iloc[i-3:i]
+        baseline = float(previous.sum() / 3)
+        count = int(counts.iloc[i])
+        if count >= minimum and count >= multiplier * baseline:
+            rows.append({"month": str(periods[i]), "count": count,
+                         "previous_3_total": int(previous.sum()),
+                         "baseline": baseline, "threshold": max(minimum, multiplier * baseline)})
+    return pd.DataFrame(rows, columns=["month", "count", "previous_3_total", "baseline", "threshold"])

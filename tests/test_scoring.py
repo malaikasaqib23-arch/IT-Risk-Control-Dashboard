@@ -21,7 +21,7 @@ def test_monthly_overdue_boundary():
     assert not overdue_test('2026-09-16','Monthly','2026-10-31') # 45 days
     assert overdue_test('2026-09-15','Monthly','2026-10-31')
 
-def test_never_tested_separately(): assert not overdue_test(pd.NaT,'Monthly','2026-10-31')
+def test_never_tested_separately(): assert overdue_test(pd.NaT,'Monthly','2026-10-31')
 
 def test_frequency_spelling(): assert overdue_test('2025-01-01','Annually','2026-10-31')
 

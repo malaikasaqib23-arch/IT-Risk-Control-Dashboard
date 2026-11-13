@@ -5,6 +5,7 @@ Run: python analyze_data.py
 """
 from pathlib import Path
 import pandas as pd
+from monitoring import event_risk_register
 
 ROOT = Path(__file__).resolve().parent / "data"
 AS_OF = pd.Timestamp('2026-10-31')
@@ -68,7 +69,8 @@ score_map = {'Pass': 100, 'Partial': 50, 'Fail': 0}
 latest['health_score'] = latest['result'].map(score_map)
 if latest['health_score'].isna().any():
     raise ValueError('Unexpected test result; cannot calculate health.')
-health = latest['health_score'].mean()
+# Design choice: missing controls contribute zero health, as on the dashboard.
+health = latest['health_score'].sum() / len(controls) if len(controls) else float('nan')
 coverage_count = latest['control_id'].nunique()
 coverage = percent(coverage_count, len(controls))
 print('\n--- KPI 1: Overall Control Health ---')
@@ -111,16 +113,18 @@ overdue['days_since_test'] = (AS_OF - overdue['last_test_date']).dt.days
 overdue['threshold_days'] = overdue['frequency_days'] * 1.5
 overdue['never_tested'] = overdue['last_test_date'].isna()
 overdue['is_overdue'] = (
-    overdue['last_test_date'].notna()
-    & overdue['days_since_test'].gt(overdue['threshold_days'])
+    overdue['never_tested']
+    | overdue['days_since_test'].gt(overdue['threshold_days'])
 )
 print('\n--- KPI 3: Overdue Control Tests ---')
 print('Overdue Controls:', int(overdue['is_overdue'].sum()))
-print('Never Tested (reported separately):', int(overdue['never_tested'].sum()))
+print('Never Tested (included in overdue):', int(overdue['never_tested'].sum()))
 print('Overdue control details:')
 cols = ['control_id', 'testing_frequency', 'last_test_date', 'days_since_test']
 print(overdue.loc[overdue['is_overdue'], cols].to_string(index=False) if overdue['is_overdue'].any() else 'None')
 
+# Use the same event-based risk calculation as the default dashboard mode.
+risks = event_risk_register(controls, tests, incidents, risks, AS_OF)
 # Open risks includes In Progress (not closed/resolved).
 open_risks = risks[risks['status'].str.casefold().isin(['open', 'in progress'])].copy()
 open_risks['risk_score'] = pd.to_numeric(open_risks['risk_score'], errors='coerce')

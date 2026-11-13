@@ -4,6 +4,7 @@ This script does not modify source data.
 """
 from pathlib import Path
 import pandas as pd
+from alerts import incident_spikes
 
 ROOT = Path(__file__).resolve().parent / "data"
 REFERENCE_DATE = pd.Timestamp('2026-10-31')
@@ -41,13 +42,11 @@ days = (REFERENCE_DATE - last_backup).days if pd.notna(last_backup) else None
 check('2 CTRL-014 overdue monthly test', days is not None and days > 45,
       f'last test: {last_backup.date() if pd.notna(last_backup) else "none"}; days: {days}; threshold: 45')
 
-# 3: incident spike rule: >= 2x median of other months AND >= 10 incidents
-monthly = incidents.groupby(incidents.incident_date.dt.to_period('M')).size()
-sept = monthly.get(pd.Period('2026-09'), 0)
-other_median = monthly.drop(pd.Period('2026-09'), errors='ignore').median()
-spike = sept >= 10 and sept >= 2 * other_median
-check('3 September 2026 incident spike', spike,
-      f'September: {sept}; median other months: {other_median}; rule: >=10 and >=2x median')
+# 3: production spike detector: >=10 and >=2x previous three complete months.
+spikes = incident_spikes(incidents, REFERENCE_DATE, '2025-11-01')
+sept = spikes.loc[spikes['month'].eq('2026-09')]
+check('3 September 2026 incident spike', not sept.empty,
+      sept.to_dict('records'))
 
 # 4: latest Partial test has unresolved finding
 c13 = latest.loc[latest.control_id.eq('CTRL-013')]

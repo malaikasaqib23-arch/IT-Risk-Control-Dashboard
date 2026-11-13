@@ -1,0 +1,78 @@
+/* Reference-inspired presentation; Streamlit widgets retain native behavior. */
+[data-testid="stAppViewContainer"] {
+  background: radial-gradient(ellipse at 68% 0%, #29205c55 0%, transparent 43%),
+              radial-gradient(ellipse at 4% 45%, #0e506c22 0%, transparent 40%), #080b19;
+}
+[data-testid="stHeader"] { background: #080b19e8; }
+[data-testid="stSidebar"] { border-right: 1px solid #29304f; }
+.block-container { max-width: 1600px; }
+.observatory-kicker { color: #22d3ee; font-size: .74rem; letter-spacing: .22em; font-weight: 700; margin: .3rem 0 .5rem; }
+h1 { letter-spacing: -.045em; font-weight: 750; }
+h2, h3 { letter-spacing: -.02em; }
+[data-testid="stMetric"] {
+  background: linear-gradient(135deg, #151c38 0%, #10142b 75%);
+  border: 1px solid #30385b; border-top: 2px solid #8b5cf6;
+  border-radius: 15px; padding: 1rem 1.1rem; min-height: 125px;
+  box-shadow: 0 8px 28px #00000026, inset 0 1px 0 #ffffff05;
+}
+[data-testid="stMetricValue"] { color: #74e9f7; font-variant-numeric: tabular-nums; }
+[data-testid="stColumn"]:nth-child(1) [data-testid="stMetric"] { border-top-color: #22d3ee; }
+[data-testid="stColumn"]:nth-child(2) [data-testid="stMetric"] { border-top-color: #a78bfa; }
+[data-testid="stColumn"]:nth-child(3) [data-testid="stMetric"] { border-top-color: #f472b6; }
+[data-testid="stColumn"]:nth-child(4) [data-testid="stMetric"] { border-top-color: #60a5fa; }
+[data-testid="stColumn"]:nth-child(2) [data-testid="stMetricValue"] { color: #b9a5fc; }
+[data-testid="stColumn"]:nth-child(3) [data-testid="stMetricValue"] { color: #f8a0cb; }
+[data-testid="stColumn"]:nth-child(4) [data-testid="stMetricValue"] { color: #89bcff; }
+[data-testid="stMetricLabel"] { color: #b7c2e3; }
+[data-testid="stPlotlyChart"] {
+  background: linear-gradient(145deg, #12172d, #0e1225);
+  outline: 1px solid #252d4e; border-radius: 16px;
+}
+[data-testid="stRadio"] > div { gap: .6rem; }
+[data-testid="stRadio"] label { background: #151a34; border: 1px solid #30385b; border-radius: 9px; padding: .5rem .8rem; }
+[data-testid="stExpander"] { border-color: #29304f; }
+@media (max-width: 700px) {
+  [data-testid="stMetric"] { min-height: 110px; padding: .8rem; }
+  h1 { font-size: 2rem; }
+}
+
+/* Compact, grouped filter panel inspired by the reference's pill controls. */
+[data-testid="stSidebar"] {
+  background: linear-gradient(180deg, #11162c 0%, #0c1023 100%);
+}
+[data-testid="stSidebarUserContent"] { padding: 1.4rem 1.15rem; }
+.sidebar-eyebrow { color: #87a0cc; font-size: .64rem; font-weight: 700; letter-spacing: .18em; }
+[data-testid="stSidebar"] h2 { font-size: 1.42rem; letter-spacing: -.035em; }
+[data-testid="stSidebar"] [data-testid="stCaptionContainer"] { color: #94a3c4; font-size: .75rem; }
+[data-testid="stSidebar"] hr { border-color: #2a324e; margin: .55rem 0; }
+[data-testid="stSidebar"] [data-testid="stWidgetLabel"] p { font-weight: 650; font-size: .8rem; }
+[data-testid="stSidebar"] button[aria-pressed] {
+  border-radius: 999px; padding: .3rem .65rem; min-height: 2rem;
+  border: 1px solid #36415f; background: #151d34; color: #afbddb;
+  font-size: .76rem; transition: background .15s ease, border-color .15s ease;
+}
+[data-testid="stSidebar"] button[aria-pressed="true"] {
+  background: #273b5b; border-color: #62b7d4; color: #e1f7ff;
+  box-shadow: inset 0 0 0 1px #62b7d422;
+}
+[data-testid="stSidebar"] button[aria-pressed]:hover { border-color: #92cfe2; }
+[data-testid="stSidebar"] [data-testid="stExpander"] { border-radius: 12px; background: #131a2e; }
+[data-testid="stSidebar"] [data-baseweb="tag"] { border-radius: 999px; font-size: .72rem; }
+[data-testid="stSidebar"] [data-testid="stMultiSelect"] [data-baseweb="select"] > div:first-child {
+  max-height: 9rem; overflow-y: auto;
+}
+[data-testid="stSidebar"] [data-testid="stButton"] button {
+  border-radius: 999px; background: #1a243d; border-color: #35476b; font-size: .8rem;
+}
+[data-testid="stSidebar"] [data-testid="stButton"] button:hover { border-color: #62b7d4; color: #c6f4ff; }
+.sidebar-scope {
+  display: flex; justify-content: space-between; align-items: center; gap: .5rem;
+  margin-top: .6rem; padding: .8rem .9rem; border: 1px solid #32425f;
+  border-radius: 12px; background: #17263b; font-size: .76rem; color: #9eb8d2;
+}
+.sidebar-scope strong { color: #a7e6f3; font-weight: 650; }
+
+[data-testid="stSidebar"] button[data-variant="pills"][aria-pressed="true"] {
+  background: #273b5b !important; border-color: #62b7d4 !important; color: #e1f7ff !important;
+}
+[data-testid="stSidebar"] button[data-variant="pills"] p { color: inherit !important; font-size: .74rem; }

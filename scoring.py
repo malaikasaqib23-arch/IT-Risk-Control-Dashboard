@@ -29,8 +29,8 @@ def risk_band(score):
 
 
 def overdue_test(last_test, frequency, as_of):
-    """Never tested is separately flagged; does not silently count as overdue."""
-    if pd.isna(last_test): return False
+    """Design choice: never-tested controls are overdue, with a separate flag."""
+    if pd.isna(last_test): return True
     days = FREQUENCY_DAYS.get(str(frequency).strip().lower())
     if days is None: raise ValueError(f'Unknown testing frequency: {frequency}')
     return (pd.Timestamp(as_of) - pd.Timestamp(last_test)).days > 1.5 * days
@@ -53,6 +53,8 @@ def control_health_table(controls, tests, as_of):
     out['health_score'] = out['result'].map(RESULT_POINTS)
     invalid = out['result'].notna() & out['health_score'].isna()
     if invalid.any(): raise ValueError('Unknown results in test data')
+    # Design choice: missing test evidence contributes zero health.
+    out['health_score'] = out['health_score'].fillna(0)
     out['never_tested'] = out['test_date'].isna()
     out['is_overdue'] = out.apply(lambda r: overdue_test(r['test_date'],r['testing_frequency'],as_of),axis=1)
     return out

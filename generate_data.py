@@ -1,17 +1,24 @@
 """Generate reproducible, entirely fictional IT-risk dashboard data.
 Run: python generate_data.py
-Requires: pandas, numpy. Uses the adjacent SYNTHETIC_controls_DRAFT.csv.
+Requires: pandas, numpy. Uses data/SYNTHETIC_controls_DRAFT.csv; --output-dir selects an isolated destination.
 """
 from pathlib import Path
+import argparse
 import numpy as np
 import pandas as pd
+from synthetic_links import complete_synthetic_links
 
-ROOT = Path(__file__).resolve().parent
+parser = argparse.ArgumentParser(description="Generate SYNTHETIC demo tables; never use firm data.")
+parser.add_argument("--output-dir", type=Path, default=Path(__file__).resolve().parent / "data")
+args = parser.parse_args()
+ROOT = args.output_dir.resolve()
+ROOT.mkdir(parents=True, exist_ok=True)
+CONTROL_SOURCE = Path(__file__).resolve().parent / "data" / "SYNTHETIC_controls_DRAFT.csv"
 SEED = 202611
 AS_OF = pd.Timestamp('2026-10-31')
 START = pd.Timestamp('2025-11-01')
 rng = np.random.default_rng(SEED)
-controls = pd.read_csv(ROOT / 'SYNTHETIC_controls_DRAFT.csv', encoding='utf-8-sig', dtype={'control_id': str})
+controls = pd.read_csv(CONTROL_SOURCE, encoding='utf-8-sig', dtype={'control_id': str})
 assert len(controls) == 19 and controls.control_id.is_unique
 ids = controls.control_id.tolist()
 frequency_months = {'Monthly':1, 'Quarterly':3, 'Semi-annual':6, 'Semi-annually':6, 'Annually':12, 'Annual':12}
@@ -85,7 +92,7 @@ for i in range(1,111):
         incident_type=str(rng.choice(incident_types)),severity=sev,
         description=f'SYNTHETIC {sev.lower()} security event for dashboard testing',assigned_team='Synthetic SOC',
         status=status,resolved_date=resolved.date().isoformat() if pd.notna(resolved) else ''))
-incidents=pd.DataFrame(inc)
+incidents=complete_synthetic_links(pd.DataFrame(inc))
 # Guaranteed critical open incident (high/critical incident alert).
 incidents.loc[0,['severity','status','resolved_date']]=['Critical','Open','']
 
@@ -107,5 +114,6 @@ risk_register=pd.DataFrame(risks)
 
 for name,df in [('control_tests',tests),('incidents',incidents),('risk_register',risk_register)]:
     df.to_csv(ROOT/f'SYNTHETIC_{name}.csv',index=False,encoding='utf-8-sig')
+controls.to_csv(ROOT / 'SYNTHETIC_controls_DRAFT.csv', index=False, encoding='utf-8-sig')
 print(f'Generated {len(controls)} controls, {len(tests)} tests, {len(incidents)} incidents, {len(risk_register)} risks.')
 print('Fixed random seed:',SEED,'| Reference date:',AS_OF.date())

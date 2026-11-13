@@ -1,0 +1,44 @@
+classification,table,field,type,allowed_values,meaning
+SYNTHETIC,controls,control_id,text,synthetic text; see meaning,"[Design choice] Fictional control identifier; controls PK, other tables FK (incident link may be blank)."
+SYNTHETIC,controls,iso_reference,text,synthetic text; see meaning,[Assumption] Proposed ISO Annex A reference; verify official numbering.
+SYNTHETIC,controls,iso_title,text,synthetic text; see meaning,[Assumption] Proposed control title; verify against licensed standard.
+SYNTHETIC,controls,csf_function,text,Govern | Identify | Protect | Detect | Respond | Recover,[Assumption] Proposed CSF function grouping; mapping requires review.
+SYNTHETIC,controls,csf_category,text,synthetic text; see meaning,[Assumption] Proposed CSF category identifier; verify.
+SYNTHETIC,controls,csf_outcome,text,synthetic text; see meaning,[Assumption] Proposed CSF outcome identifier; verify.
+SYNTHETIC,controls,mapping_rationale,text,synthetic text; see meaning,[Assumption] Student proposal explaining control-to-CSF mapping; not an official equivalence.
+SYNTHETIC,controls,owner,text,synthetic text; see meaning,[Design choice] Assigned synthetic department; risk owner is distinct from control owner.
+SYNTHETIC,controls,testing_frequency,text,synthetic text; see meaning,[Design choice] Planned cadence; runtime conversions are 30/90/180/365 days.
+SYNTHETIC,controls,impact_score,integer,integer 1..5,[Design choice] Fixed control impact 1..5; used in recomputed ratings.
+SYNTHETIC,controls,impact_rationale,text,synthetic text; see meaning,[Design choice] Written reason for fixed control impact.
+SYNTHETIC,control_tests,test_id,text,synthetic text; see meaning,[Design choice] Synthetic control-test primary key.
+SYNTHETIC,control_tests,control_id,text,synthetic text; see meaning,"[Design choice] Fictional control identifier; controls PK, other tables FK (incident link may be blank)."
+SYNTHETIC,control_tests,test_date,ISO date YYYY-MM-DD,synthetic text; see meaning,[Design choice] Date a fictional control test occurred.
+SYNTHETIC,control_tests,result,text,Pass | Partial | Fail,[Design choice] Pass/Partial/Fail; health 100/50/0.
+SYNTHETIC,control_tests,tested_by,text,synthetic text; see meaning,"[Design choice] Synthetic testing department, never a real person."
+SYNTHETIC,control_tests,evidence_reference,text,synthetic text; see meaning,[Design choice] Fictional evidence identifier; no real evidence files.
+SYNTHETIC,control_tests,findings,text,synthetic text; see meaning,[Design choice] Fictional test finding; blank when no finding.
+SYNTHETIC,control_tests,remediation_due_date,ISO date YYYY-MM-DD,synthetic text; see meaning,[Design choice] Planned action due date; blank permitted but open missing dates warn.
+SYNTHETIC,control_tests,remediation_status,text,synthetic text; see meaning,[Design choice] Not Required/Open/In Progress/Closed.
+SYNTHETIC,control_tests,next_test_due,ISO date YYYY-MM-DD,synthetic text; see meaning,[Design choice] Generator schedule date; overdue calculation instead uses latest test plus 1.5x interval.
+SYNTHETIC,control_tests,test_type,text,synthetic text; see meaning,[Design choice] Scheduled or follow-up verification.
+SYNTHETIC,incidents,incident_id,text,synthetic text; see meaning,[Design choice] Synthetic incident primary key.
+SYNTHETIC,incidents,control_id,text,synthetic text; see meaning,"[Design choice] Fictional control identifier; controls PK, other tables FK (incident link may be blank)."
+SYNTHETIC,incidents,incident_date,ISO date YYYY-MM-DD,synthetic text; see meaning,[Design choice] Date of fictional incident.
+SYNTHETIC,incidents,incident_type,text,synthetic text; see meaning,[Design choice] Fictional event classification.
+SYNTHETIC,incidents,severity,text,Low | Medium | High | Critical,[Design choice] Low/Medium/High/Critical incident severity.
+SYNTHETIC,incidents,description,text,synthetic text; see meaning,[Design choice] Fictional event description.
+SYNTHETIC,incidents,assigned_team,text,synthetic text; see meaning,[Design choice] Synthetic incident department.
+SYNTHETIC,incidents,status,text,Open | In Progress | Resolved | Closed,[Design choice] Record state; open includes Open/In Progress. See table-specific allowed values.
+SYNTHETIC,incidents,resolved_date,ISO date YYYY-MM-DD,synthetic text; see meaning,[Design choice] Required for Resolved/Closed incidents; blank for open states.
+SYNTHETIC,risk_register,risk_id,text,synthetic text; see meaning,[Design choice] Synthetic risk-register primary key.
+SYNTHETIC,risk_register,control_id,text,synthetic text; see meaning,"[Design choice] Fictional control identifier; controls PK, other tables FK (incident link may be blank)."
+SYNTHETIC,risk_register,risk_description,text,synthetic text; see meaning,[Design choice] Fictional description of control-associated risk.
+SYNTHETIC,risk_register,category,text,synthetic text; see meaning,[Design choice] Risk category label.
+SYNTHETIC,risk_register,likelihood,integer,integer 1..5,[Design choice] Stored likelihood 1..5; optional in-memory recomputation uses 365-day events.
+SYNTHETIC,risk_register,impact,integer,integer 1..5,[Design choice] Stored impact 1..5; must match control impact_score.
+SYNTHETIC,risk_register,risk_score,integer,integer 1..25,"[Design choice] Stored likelihood times impact, 1..25."
+SYNTHETIC,risk_register,risk_level,text,Low | Medium | High | Critical,[Design choice] Low1..4/Medium5..9/High10..16/Critical17..25.
+SYNTHETIC,risk_register,owner,text,synthetic text; see meaning,[Design choice] Assigned synthetic department; risk owner is distinct from control owner.
+SYNTHETIC,risk_register,treatment_plan,text,synthetic text; see meaning,[Design choice] Fictional planned risk response.
+SYNTHETIC,risk_register,status,text,Open | In Progress | Closed | Accepted | Resolved,[Design choice] Record state; open includes Open/In Progress. See table-specific allowed values.
+SYNTHETIC,risk_register,review_date,ISO date YYYY-MM-DD,synthetic text; see meaning,[Design choice] Planned next review date; may occur after report date.

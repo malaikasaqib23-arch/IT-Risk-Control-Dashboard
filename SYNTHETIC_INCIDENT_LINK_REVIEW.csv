@@ -1,0 +1,16 @@
+incident_id,incident_type,control_id,classification
+INC-0004,Malware,CTRL-011,[Design choice] SYNTHETIC type-based assignment
+INC-0014,Malware,CTRL-011,[Design choice] SYNTHETIC type-based assignment
+INC-0017,Suspicious Activity,CTRL-016,[Design choice] SYNTHETIC type-based assignment
+INC-0070,Configuration Issue,CTRL-013,[Design choice] SYNTHETIC type-based assignment
+INC-0071,Service Disruption,CTRL-006,[Design choice] SYNTHETIC type-based assignment
+INC-0077,Unauthorized Access,CTRL-002,[Design choice] SYNTHETIC type-based assignment
+INC-0083,Unauthorized Access,CTRL-002,[Design choice] SYNTHETIC type-based assignment
+INC-0084,Malware,CTRL-011,[Design choice] SYNTHETIC type-based assignment
+INC-0093,Malware,CTRL-011,[Design choice] SYNTHETIC type-based assignment
+INC-0094,Configuration Issue,CTRL-013,[Design choice] SYNTHETIC type-based assignment
+INC-0095,Malware,CTRL-011,[Design choice] SYNTHETIC type-based assignment
+INC-0097,Unauthorized Access,CTRL-002,[Design choice] SYNTHETIC type-based assignment
+INC-0098,Suspicious Activity,CTRL-016,[Design choice] SYNTHETIC type-based assignment
+INC-0103,Configuration Issue,CTRL-013,[Design choice] SYNTHETIC type-based assignment
+INC-0107,Malware,CTRL-011,[Design choice] SYNTHETIC type-based assignment

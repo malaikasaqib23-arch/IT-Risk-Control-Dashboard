@@ -1,21 +1,26 @@
 
 """
 IT Risk & Control Monitoring Dashboard
-Week 4 Prototype v1
+Guide-aligned prototype v2
 
 SYNTHETIC DATA ONLY
 All risk thresholds are project design choices.
 """
 
 from pathlib import Path
-from calendar import monthrange
 
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
-from scoring import control_health_table, monthly_incidents
+from alerts import consecutive_failures, missing_risk_owners, incident_spikes
+from monitoring import (dashboard_kpis, event_risk_register, filter_incidents, unresolved_findings,
+                        selected_heatmap_cell, public_scenario_results)
+from quality import validate_data
+from scoring import control_health_table, monthly_incidents, FREQUENCY_DAYS
+from visuals import (style_chart, outcome_donut, incident_area, function_radar, risk_donut,
+                     PALETTE, SEVERITY, CYAN, VIOLET, rounded_risk_heatmap)
 
 
 # ============================================================
@@ -28,17 +33,6 @@ DATA = ROOT / "data"
 AS_OF = pd.Timestamp("2026-10-31")
 FIRST_DATE = pd.Timestamp("2025-11-01")
 
-MONTHS = pd.period_range(
-    start=FIRST_DATE.to_period("M"),
-    end=AS_OF.to_period("M"),
-    freq="M"
-)
-
-MONTH_LABELS = [
-    period.strftime("%B %Y")
-    for period in MONTHS
-]
-
 st.set_page_config(
     page_title="IT Risk & Control Monitoring | SYNTHETIC",
     page_icon="📊",
@@ -46,12 +40,14 @@ st.set_page_config(
 )
 
 
+st.html(f"<style>{(ROOT / 'dashboard.css').read_text(encoding='utf-8')}</style>")
+
 # ============================================================
 # 2. LOAD SYNTHETIC DATA
 # ============================================================
 
-@st.cache_data
-def load_data():
+@st.cache_data(max_entries=4)
+def load_data(signature):
 
     controls_path = DATA / "SYNTHETIC_controls_DRAFT.csv"
 
@@ -72,31 +68,53 @@ def load_data():
         DATA / "SYNTHETIC_risk_register.csv"
     )
 
-    for column in [
-        "test_date",
-        "remediation_due_date",
-        "next_test_due"
-    ]:
-        if column in tests.columns:
-            tests[column] = pd.to_datetime(
-                tests[column],
-                errors="coerce"
-            )
-
-    for column in [
-        "incident_date",
-        "resolved_date"
-    ]:
-        if column in incidents.columns:
-            incidents[column] = pd.to_datetime(
-                incidents[column],
-                errors="coerce"
-            )
-
     return controls, tests, incidents, risks
 
 
-controls, tests, incidents, risks = load_data()
+try:
+    controls_file = DATA / "SYNTHETIC_controls_DRAFT.csv"
+    if not controls_file.exists():
+        controls_file = DATA / "SYNTHETIC_controls.csv"
+    source_files = [controls_file] + [DATA / f"SYNTHETIC_{name}.csv"
+                                    for name in ["control_tests", "incidents", "risk_register"]]
+    signature = tuple((str(path), path.stat().st_mtime_ns, path.stat().st_size)
+                      for path in source_files)
+    controls, tests, incidents, risks = load_data(signature)
+except (OSError, ValueError, pd.errors.ParserError) as error:
+    st.error(f"Synthetic data could not be loaded: {error}")
+    st.stop()
+
+quality_results = validate_data(controls, tests, incidents, risks, AS_OF, FIRST_DATE)
+quality_errors = quality_results.loc[~quality_results["Passed"] & quality_results["Severity"].eq("error")]
+quality_warnings = quality_results.loc[~quality_results["Passed"] & quality_results["Severity"].eq("warning")]
+if not quality_errors.empty:
+    st.error("Data quality failed. Correct the listed source issues before using the dashboard.")
+    st.table(quality_results)
+    st.stop()
+
+
+# Parse only after validation so malformed supplied dates cannot become silent blanks.
+for column in [
+    "test_date",
+    "remediation_due_date",
+    "next_test_due"
+]:
+    if column in tests.columns:
+        tests[column] = pd.to_datetime(
+            tests[column],
+            errors="coerce"
+        )
+
+for column in [
+    "incident_date",
+    "resolved_date"
+]:
+    if column in incidents.columns:
+        incidents[column] = pd.to_datetime(
+            incidents[column],
+            errors="coerce"
+        )
+
 
 # Reporting-date cutoff
 tests = tests.loc[
@@ -118,7 +136,47 @@ health = control_health_table(
     AS_OF
 )
 
-risk_with_controls = risks.merge(
+ALL_OWNERS = "All departments"
+
+
+def normalize_owner_selection():
+    values = list(st.session_state.get("filter_owner", []))
+    previous = st.session_state.get("_previous_owner_selection", [ALL_OWNERS])
+    if ALL_OWNERS in values and len(values) > 1:
+        values = [ALL_OWNERS] if ALL_OWNERS not in previous else [v for v in values if v != ALL_OWNERS]
+    st.session_state["filter_owner"] = values
+    st.session_state["_previous_owner_selection"] = values
+
+
+def reset_sidebar_filters():
+    st.session_state["filter_csf"] = sorted(controls["csf_function"].dropna().unique().tolist())
+    st.session_state["filter_owner"] = [ALL_OWNERS]
+    st.session_state["_previous_owner_selection"] = [ALL_OWNERS]
+    st.session_state["filter_band"] = ["Low", "Medium", "High", "Critical"]
+    st.session_state["event_start"] = FIRST_DATE.date()
+    st.session_state["event_end"] = AS_OF.date()
+
+
+with st.sidebar:
+    st.markdown('<div class="sidebar-eyebrow">CONTROL OBSERVATORY</div>', unsafe_allow_html=True)
+    st.header("Refine your view")
+    st.caption("Choose your scope. Results update instantly.")
+    st.button("Reset filters", key="reset_sidebar", on_click=reset_sidebar_filters,
+              icon=":material/restart_alt:", width="stretch")
+    filter_panel = st.container()
+    with st.expander("Scoring settings", icon=":material/tune:"):
+        risk_basis = st.selectbox(
+            "Risk scoring basis",
+            ["Recomputed from events", "Stored register"],
+            key="risk_basis",
+            help="Recomputed scores use failed tests and linked incidents in the preceding 365 days. CSVs are never updated."
+        )
+        st.caption("Snapshot: 31 October 2026")
+
+recomputed_risks = event_risk_register(controls, tests, incidents, risks, AS_OF)
+active_risks = recomputed_risks if risk_basis == "Recomputed from events" else risks
+
+risk_with_controls = active_risks.merge(
     controls[
         [
             "control_id",
@@ -138,22 +196,39 @@ risk_with_controls = risks.merge(
 # 4. DASHBOARD TITLE
 # ============================================================
 
+st.markdown('<div class="observatory-kicker">CONTROL OBSERVATORY / SYNTHETIC DEMO</div>', unsafe_allow_html=True)
 st.title("IT Risk & Control Monitoring Dashboard")
 
 st.caption(
     "SYNTHETIC DATA ONLY | "
     "Reporting date: 31 October 2026 | "
-    "Prototype v1 — project-defined risk rules"
+    "Prototype v2 — project-defined risk rules"
 )
 
+
+passed_checks = int(quality_results["Passed"].sum())
+if quality_warnings.empty:
+    st.success(f"Data quality: {passed_checks}/{len(quality_results)} checks passed.")
+else:
+    st.error(f"Data quality: {passed_checks}/{len(quality_results)} checks passed; "
+               f"Failed review checks requiring action: {len(quality_warnings)}.")
+with st.expander("Data quality checks and data scope"):
+    st.table(quality_results)
+    unlinked = incidents.loc[incidents["control_id"].isna() | incidents["control_id"].astype(str).str.strip().eq("")].copy()
+    if not unlinked.empty:
+        st.caption("Incident records requiring control-link review")
+        st.table(unlinked)
+        st.download_button("Download unlinked incidents for review", data=unlinked.to_csv(index=False).encode("utf-8"),
+                           file_name="SYNTHETIC_unlinked_incidents_review.csv", mime="text/csv", key="download_unlinked_review")
+
+    st.caption("[Assumption] ISO references and CSF mappings are proposals pending source verification. "
+               "[Design choice] Unlinked incidents appear only when every control is selected.")
 
 # ============================================================
 # 5. SIDEBAR FILTERS
 # ============================================================
 
-with st.sidebar:
-
-    st.header("Dashboard filters")
+with filter_panel:
 
     # NIST CSF filter
     functions = sorted(
@@ -163,25 +238,11 @@ with st.sidebar:
         .tolist()
     )
 
-    selected_functions = st.multiselect(
-        "NIST CSF function",
-        options=functions,
-        default=functions
+    selected_functions = st.pills(
+        "NIST CSF function", options=functions, default=functions,
+        selection_mode="multi", key="filter_csf", wrap=True
     )
-
-    # Owner filter
-    owners = sorted(
-        controls["owner"]
-        .dropna()
-        .unique()
-        .tolist()
-    )
-
-    selected_owners = st.multiselect(
-        "Control owner",
-        options=owners,
-        default=owners
-    )
+    st.divider()
 
     # Risk band filter
     risk_bands = [
@@ -191,113 +252,45 @@ with st.sidebar:
         "Critical"
     ]
 
-    selected_bands = st.multiselect(
-        "Risk band",
-        options=risk_bands,
-        default=risk_bands
+    selected_bands = st.pills(
+        "Risk band", options=risk_bands, default=risk_bands,
+        selection_mode="multi", key="filter_band", wrap=True
     )
-
     st.divider()
 
-    # ========================================================
-    # WORKING DATE FILTER - DROPDOWNS
-    # ========================================================
-
-    st.subheader("Event date range")
-
-    st.caption("Select the month and day directly.")
-
-    # Start month
-    start_month_label = st.selectbox(
-        "Start month",
-        options=MONTH_LABELS,
-        index=0,
-        key="start_month"
+    owners = sorted(controls["owner"].fillna("Unassigned").unique().tolist())
+    # Represent the unrestricted selection as one chip instead of every department.
+    if "filter_owner" in st.session_state and set(st.session_state["filter_owner"]) == set(owners):
+        st.session_state["filter_owner"] = [ALL_OWNERS]
+        st.session_state["_previous_owner_selection"] = [ALL_OWNERS]
+    owner_selection = st.multiselect(
+        "Control owner", options=[ALL_OWNERS] + owners, default=[ALL_OWNERS],
+        key="filter_owner", placeholder="Search departments...", on_change=normalize_owner_selection,
+        select_all=False, help="Choose one or more departments. All departments restores the full owner scope."
     )
+    selected_owners = owners if ALL_OWNERS in owner_selection else owner_selection
+    st.divider()
 
-    start_period = MONTHS[
-        MONTH_LABELS.index(start_month_label)
-    ]
-
-    # Start day
-    start_days = list(
-        range(
-            1,
-            monthrange(
-                start_period.year,
-                start_period.month
-            )[1] + 1
-        )
+    st.markdown("**Event date range**")
+    st.caption("Pick a date from the calendar or type DD/MM/YYYY.")
+    start_date = st.date_input(
+        "Start date", value=FIRST_DATE.date(), min_value=FIRST_DATE.date(), max_value=AS_OF.date(),
+        key="event_start", format="DD/MM/YYYY"
     )
-
-    start_day = st.selectbox(
-        "Start day",
-        options=start_days,
-        index=0,
-        key="start_day"
+    end_date = st.date_input(
+        "End date", value=AS_OF.date(), min_value=FIRST_DATE.date(), max_value=AS_OF.date(),
+        key="event_end", format="DD/MM/YYYY"
     )
-
-    # End month
-    end_month_label = st.selectbox(
-        "End month",
-        options=MONTH_LABELS,
-        index=len(MONTH_LABELS) - 1,
-        key="end_month"
-    )
-
-    end_period = MONTHS[
-        MONTH_LABELS.index(end_month_label)
-    ]
-
-    # End day
-    end_days = list(
-        range(
-            1,
-            monthrange(
-                end_period.year,
-                end_period.month
-            )[1] + 1
-        )
-    )
-
-    end_day = st.selectbox(
-        "End day",
-        options=end_days,
-        index=len(end_days) - 1,
-        key="end_day"
-    )
-
-    # Construct dates
-    start = pd.Timestamp(
-        year=start_period.year,
-        month=start_period.month,
-        day=start_day
-    )
-
-    end = pd.Timestamp(
-        year=end_period.year,
-        month=end_period.month,
-        day=end_day
-    )
-
-    st.caption(
-        f"Selected range: "
-        f"{start:%Y-%m-%d} to {end:%Y-%m-%d}"
-    )
-
-    # Date validation
+    if start_date is None or end_date is None:
+        st.info("Choose both a start date and an end date.")
+        st.stop()
+    start, end = pd.Timestamp(start_date), pd.Timestamp(end_date)
+    st.caption(f"Selected range: {start:%Y-%m-%d} to {end:%Y-%m-%d}")
     if start > end:
-        st.error(
-            "Start date cannot be after end date. "
-            "Please adjust the dropdowns."
-        )
+        st.error("Start date cannot be after end date. Please adjust the calendar dates.")
         st.stop()
 
-    st.caption(
-        "Date filters apply to historical incidents "
-        "and tests. Current risk and control health "
-        "are measured at the reporting date."
-    )
+    st.caption("Current health and risk stay at the reporting date.")
 
 
 # ============================================================
@@ -307,13 +300,23 @@ with st.sidebar:
 eligible_ids = controls.loc[
     controls["csf_function"].isin(selected_functions)
     &
-    controls["owner"].isin(selected_owners),
+    controls["owner"].fillna("Unassigned").isin(selected_owners),
     "control_id"
 ]
+
+# Risk-band selection defines the same control population on every page.
+if set(selected_bands) != set(risk_bands):
+    band_ids = active_risks.loc[active_risks["risk_level"].isin(selected_bands), "control_id"]
+    eligible_ids = eligible_ids.loc[eligible_ids.isin(band_ids)]
 
 health_f = health.loc[
     health["control_id"].isin(eligible_ids)
 ].copy()
+
+with st.sidebar:
+    st.markdown(f'<div class="sidebar-scope"><span>Current scope</span><strong>{len(health_f)} controls</strong></div>',
+                unsafe_allow_html=True)
+
 
 risks_f = risk_with_controls.loc[
     risk_with_controls["control_id"].isin(eligible_ids)
@@ -329,11 +332,10 @@ open_risks = risks_f.loc[
     .isin(["open", "in progress"])
 ].copy()
 
-incidents_f = incidents.loc[
-    incidents["control_id"].isin(eligible_ids)
-    &
-    incidents["incident_date"].between(start, end)
-].copy()
+all_controls_selected = set(eligible_ids) == set(controls["control_id"])
+incidents_f = filter_incidents(incidents, eligible_ids, all_controls_selected, start, end)
+incident_history_f = filter_incidents(incidents, eligible_ids, all_controls_selected, FIRST_DATE, AS_OF)
+
 
 tests_f = tests.loc[
     tests["control_id"].isin(eligible_ids)
@@ -346,46 +348,11 @@ tests_f = tests.loc[
 # 7. CALCULATE FOUR HEADLINE KPIs
 # ============================================================
 
-# KPI 1: Overall control health
-overall_health = health_f["health_score"].mean()
-
-# Coverage
-coverage = (
-    100 * health_f["health_score"].notna().mean()
-    if len(health_f)
-    else float("nan")
-)
-
-# KPI 2: Controls tested on time
-# Union avoids counting a never-tested, overdue control twice.
-not_on_time = (
-    health_f["is_overdue"].fillna(False)
-    |
-    health_f["never_tested"].fillna(False)
-)
-
-on_time_percentage = (
-    100 * (~not_on_time).sum() / len(health_f)
-    if len(health_f)
-    else float("nan")
-)
-
-# KPI 3: Open High/Critical risks
-high_critical_count = int(
-    open_risks["risk_level"]
-    .isin(["High", "Critical"])
-    .sum()
-)
-
-# KPI 4: Last 90 days, intersected with event-date filter
-last90_start = AS_OF - pd.Timedelta(days=89)
-
-last90 = incidents_f.loc[
-    incidents_f["incident_date"].between(
-        last90_start,
-        AS_OF
-    )
-]
+kpis = dashboard_kpis(health_f, risks_f, tests_f, incidents_f, AS_OF)
+overall_health = kpis["health"]
+coverage = kpis["coverage"]
+on_time_percentage = kpis["on_time"]
+high_critical_count = kpis["high_critical"]
 
 
 # ============================================================
@@ -401,8 +368,9 @@ def fmt_pct(value):
 def show_data(df, name):
     st.dataframe(
         df,
-        use_container_width=True,
-        hide_index=True
+        width="stretch",
+        hide_index=True,
+        alt=name.replace("_", " ")
     )
 
     st.download_button(
@@ -412,6 +380,16 @@ def show_data(df, name):
         mime="text/csv",
         key=f"download_{name}"
     )
+
+
+def show_chart(figure, **kwargs):
+    return st.plotly_chart(style_chart(figure), width="stretch", theme=None, **kwargs)
+
+
+def select_heatmap_cell():
+    cell = selected_heatmap_cell(st.session_state.get("risk_count_heatmap", {}))
+    if cell is not None:
+        st.session_state["heatmap_likelihood"], st.session_state["heatmap_impact"] = cell
 
 
 def iso_theme(reference):
@@ -469,28 +447,37 @@ if page == "Overview":
 
     col4.metric(
         "Incidents in last 90 days (selected range)",
-        len(last90)
+        kpis["incidents90"]
     )
 
-    # Historical test pass rate
-    pass_rate = (
-        100 * tests_f["result"].eq("Pass").mean()
-        if len(tests_f)
-        else float("nan")
-    )
+    support = st.columns(4)
+    support[0].metric("Historical test pass rate", fmt_pct(kpis["pass_rate"]))
+    support[1].metric("Overdue controls", kpis["overdue"])
+    support[2].metric("Unresolved findings", kpis["exceptions"])
+    support[3].metric("Overdue remediation", fmt_pct(kpis["overdue_remediation"]))
+    st.caption(f"Testing coverage: {fmt_pct(coverage)} | "
+               f"Open findings missing due dates: {kpis['missing_due_dates']}")
 
-    st.caption(
-        f"Testing coverage: {fmt_pct(coverage)} | "
-        f"Test pass rate: {fmt_pct(pass_rate)} | "
-        f"Overdue controls: "
-        f"{int(health_f['is_overdue'].sum())}"
-    )
+    with st.expander("Indicator formulas and suggested management actions"):
+        st.table(pd.DataFrame([
+            ["Control health", "Mean latest Pass=100 / Partial=50 / Fail=0; untested=0", "Controls and latest tests", "Review failed and untested controls"],
+            ["Tested on time", "100 * controls neither overdue nor untested / selected controls", "Frequency and latest test date", "Schedule overdue testing"],
+            ["Open High/Critical risks", "Count open/in-progress risks in High or Critical", "Selected scoring basis and risk status", "Assign remediation or escalation"],
+            ["90-day incidents", "Count in [report date - 89 days, report date], intersect event filter", "Incident dates", "Review severity and recurring activity"],
+            ["Historical pass rate", "100 * Pass tests / all tests in event range", "Test results and dates", "Investigate deterioration"],
+            ["Overdue controls", "Count where elapsed days > 1.5 * interval; untested included", "Frequency and latest test date", "Resolve test coverage gaps"],
+            ["Unresolved findings", "Count nonblank Partial/Fail findings with Open/In Progress remediation", "Filtered tests and remediation status", "Review outstanding actions"],
+            ["Overdue remediation", "100 * unresolved findings due before report date / unresolved findings", "Findings and due dates; missing dates remain in denominator", "Prioritize late actions and complete missing dates"],
+        ], columns=["Indicator", "Formula [Design choice]", "Data needed", "Suggested action [Design choice]"]))
+        st.caption("[Design choice] Monthly/quarterly/semiannual/annual intervals = 30/90/180/365 days. "
+                   "Never-tested health is 0; coverage is shown separately. Zero denominators display N/A.")
 
     st.info(
         "Control health, testing timeliness, and "
         "risk status are measured as of 31 October 2026. "
         "Incident activity and historical test results "
-        "follow the selected event date range."
+        "follow the selected event date range. Risk band selects controls and all their linked records across pages. "
+        "Unlinked incidents are included only with all controls selected."
     )
 
     st.subheader(
@@ -520,6 +507,7 @@ if page == "Overview":
         y="Incidents",
         color="Severity",
         barmode="stack",
+        color_discrete_map=SEVERITY,
         category_orders={
             "Month": trend["Month"].tolist()
         },
@@ -534,10 +522,16 @@ if page == "Overview":
         legend_title="Severity"
     )
 
-    st.plotly_chart(
-        incident_fig,
-        use_container_width=True
-    )
+    activity_col, results_col = st.columns([1.8, 1])
+    with activity_col:
+        show_chart(incident_fig, key="incident_severity_chart", alt="Monthly synthetic incidents split by severity")
+    with results_col:
+        st.caption("LATEST CONTROL TEST RESULTS")
+        show_chart(outcome_donut(health_f), key="outcome_donut", alt="Latest test outcome counts for selected controls")
+        st.caption("One latest result per control; separate from historical test pass rate.")
+
+    st.subheader("Incident activity over time")
+    show_chart(incident_area(trend), key="incident_area", alt="Total incident count by month")
 
     with st.expander(
         "Monthly numbers - reconcile with source records"
@@ -572,6 +566,8 @@ elif page == "Control Health":
         by_function,
         x="csf_function",
         y="health_score",
+        color="csf_function",
+        color_discrete_sequence=PALETTE,
         range_y=[0, 100],
         labels={
             "csf_function": "NIST CSF function",
@@ -579,10 +575,12 @@ elif page == "Control Health":
         }
     )
 
-    st.plotly_chart(
-        function_fig,
-        use_container_width=True
-    )
+    function_fig.update_layout(showlegend=False)
+    show_chart(function_fig, key="csf_health_bar", alt="Mean latest control health by proposed CSF grouping")
+
+    st.subheader("Control health profile")
+    st.caption("The same CSF averages on a common 0-100 scale; this is control health, not a maturity assessment.")
+    show_chart(function_radar(by_function), key="csf_radar", alt="Radar profile of the same CSF control health averages")
 
     st.subheader(
         "Latest control health by ISO Annex A theme"
@@ -605,19 +603,20 @@ elif page == "Control Health":
 
     theme_fig = px.bar(
         by_theme,
-        x="iso_theme",
-        y="health_score",
-        range_y=[0, 100],
+        x="health_score",
+        y="iso_theme",
+        orientation="h",
+        color="iso_theme",
+        color_discrete_sequence=[CYAN, VIOLET, "#F472B6", "#3B82F6"],
+        range_x=[0, 100],
         labels={
             "iso_theme": "ISO Annex A theme",
             "health_score": "Mean control health (%)"
         }
     )
 
-    st.plotly_chart(
-        theme_fig,
-        use_container_width=True
-    )
+    theme_fig.update_layout(showlegend=False, height=330)
+    show_chart(theme_fig, key="iso_health_bar", alt="Horizontal bars of latest control health by ISO theme")
 
     st.subheader(
         "Control register and current status"
@@ -655,9 +654,14 @@ else:
 
     st.caption(
         "Each cell shows the number of open risks. "
-        "Use the likelihood and impact dropdowns "
-        "below to inspect a specific cell."
+        "Click a tile or use the likelihood and impact dropdowns "
+        "below to inspect a specific cell. Blue, white and coral encode open-risk "
+        "counts only; the colours do not represent risk severity or negative values."
     )
+
+    st.info(f"[Design choice] Risk basis: {risk_basis}. Recomputed likelihood = min(1 + failed tests "
+            "+ linked incidents, 5), over (2025-10-31, 2026-10-31]. Partial is not a Fail. "
+            "Impact comes from the control register; source CSVs remain unchanged.")
 
     # Create the 5x5 count matrix
     risk_grid = (
@@ -672,36 +676,18 @@ else:
         )
     )
 
-    # Heatmap visualization
-    heatmap_fig = go.Figure(
-        data=go.Heatmap(
-            z=risk_grid.values,
-            x=[1, 2, 3, 4, 5],
-            y=[5, 4, 3, 2, 1],
-            colorscale="YlOrRd",
-            showscale=True,
-            text=risk_grid.values,
-            texttemplate="%{text}",
-            hovertemplate=(
-                "Impact: %{x}"
-                "<br>Likelihood: %{y}"
-                "<br>Open risks: %{z}"
-                "<extra></extra>"
-            )
-        )
-    )
+    # Rounded tiles keep the same underlying count matrix and hover values.
+    heatmap_fig = rounded_risk_heatmap(risk_grid)
 
-    heatmap_fig.update_layout(
-        xaxis_title="Impact",
-        yaxis_title="Likelihood",
-        height=420
-    )
-
-    # Display chart without unreliable click selection
-    st.plotly_chart(
-        heatmap_fig,
-        use_container_width=True
-    )
+    # Native point selection updates the existing dropdowns before the rerun.
+    matrix_col, mix_col = st.columns([1.65, 1])
+    with matrix_col:
+        show_chart(heatmap_fig, key="risk_count_heatmap", on_select=select_heatmap_cell,
+                   selection_mode="points", alt="Five by five matrix of open risk counts; select a tile or use dropdowns")
+    with mix_col:
+        st.caption("OPEN RISK DISTRIBUTION")
+        show_chart(risk_donut(open_risks), key="risk_mix_donut", alt="Open risks grouped by risk band")
+        st.caption("Band colors describe risk level; heatmap intensity describes record count.")
 
     # ========================================================
     # FIXED HEATMAP DRILL-DOWN
@@ -793,6 +779,12 @@ else:
         "risk_heatmap_records"
     )
 
+    with st.expander("Risk calculation evidence and full filtered register"):
+        evidence = recomputed_risks.loc[recomputed_risks["risk_id"].isin(risks_f["risk_id"])].copy()
+        show_data(evidence, "risk_calculation_evidence")
+        st.caption("[Design choice] Comparison uses source events at the fixed report date, "
+                   "independent of the historical event filter. Each row keeps the stored values for comparison.")
+
     # ========================================================
     # 13. RULE-BASED EXCEPTION ALERTS
     # ========================================================
@@ -810,31 +802,41 @@ else:
             alerts.append({
                 "Control / Incident": record.control_id,
                 "Rule": "LATEST_TEST_FAIL",
-                "Details": "Most recent test failed"
+                "Details": f"Most recent test failed on {record.test_date:%Y-%m-%d}"
             })
 
         if record.is_overdue or record.never_tested:
+            overdue_detail = "No test recorded by the report date"
+            if not record.never_tested:
+                threshold = 1.5 * FREQUENCY_DAYS[str(record.testing_frequency).strip().lower()]
+                elapsed = (AS_OF - record.test_date).days
+                overdue_detail = (f"Last test {record.test_date:%Y-%m-%d}; "
+                                  f"{elapsed} days since test > {threshold:g}-day threshold")
             alerts.append({
                 "Control / Incident": record.control_id,
                 "Rule": "TEST_OVERDUE",
-                "Details": (
-                    "Control is overdue or "
-                    "has never been tested"
-                )
+                "Details": overdue_detail
             })
 
+    # Snapshot rule: use full history through AS_OF, like latest-test health.
+    consecutive_ids = consecutive_failures(
+        tests.loc[tests["control_id"].isin(eligible_ids)],
+        AS_OF
+    )
+
+    for control_id in consecutive_ids:
+        latest_two = tests.loc[tests["control_id"].eq(control_id)].sort_values(
+            ["test_date", "test_id"]).tail(2)
+        evidence_text = "; ".join(f"{r.test_id} ({r.test_date:%Y-%m-%d}): {r.result}"
+                                  for r in latest_two.itertuples())
+        alerts.append({
+            "Control / Incident": control_id,
+            "Rule": "CONSECUTIVE_FAILURES",
+            "Details": evidence_text
+        })
+
     # Unresolved test findings
-    unresolved = tests_f.loc[
-        tests_f["result"].isin(["Partial", "Fail"])
-        &
-        tests_f["remediation_status"]
-        .astype(str)
-        .str.strip()
-        .str.casefold()
-        .isin(["open", "in progress"])
-        &
-        tests_f["findings"].notna()
-    ]
+    unresolved = unresolved_findings(tests_f)
 
     for _, record in unresolved.iterrows():
 
@@ -866,32 +868,27 @@ else:
             "Details": "Critical incident remains open"
         })
 
-    # Monthly incident spikes
-    monthly = monthly_incidents(
-        incidents_f,
-        AS_OF
-    )
+    # Required risk-owner rule: never substitute the control department.
+    for record in missing_risk_owners(open_risks).itertuples():
+        alerts.append({
+            "Control / Incident": record.control_id,
+            "Rule": "HIGH_CRITICAL_MISSING_OWNER",
+            "Details": f"{record.risk_id}: {record.risk_level} {record.status} risk has no assigned risk owner"
+        })
 
-    for _, record in monthly.iterrows():
-
-        baseline = monthly.loc[
-            monthly["Month"].ne(record["Month"]),
-            "Total"
-        ].median()
-
-        count = int(record["Total"])
-
-        # Existing prototype spike threshold
-        if count >= 10 and count >= 2 * baseline:
-
-            alerts.append({
-                "Control / Incident": record["Month"],
-                "Rule": "INCIDENT_SPIKE",
-                "Details": (
-                    f"{count} incidents versus "
-                    f"{baseline:g} other-month median"
-                )
-            })
+    # Design choice: complete months with three complete preceding months.
+    spikes = incident_spikes(incident_history_f, AS_OF, FIRST_DATE)
+    for record in spikes.itertuples():
+        period = pd.Period(record.month, freq="M")
+        if period.end_time.normalize() < start or period.start_time > end:
+            continue
+        alerts.append({
+            "Control / Incident": record.month,
+            "Rule": "INCIDENT_SPIKE",
+            "Details": (f"{record.count} incidents; previous 3 months total={record.previous_3_total}; "
+                        f"mean={record.baseline:.2f}; threshold={record.threshold:.2f} "
+                        "(>=10 and >=2 * mean; complete calendar months)")
+        })
 
     # Convert alerts to table
     alert_table = pd.DataFrame(
@@ -906,13 +903,25 @@ else:
     st.caption(
         "Alerts show recorded conditions, "
         "not proven causes. Historical exception "
-        "alerts follow the selected date range."
+        "alerts follow the selected date range. Snapshot alerts use all tests through the report date. "
+        "[Design choice] Spike alerts use full months and their previous three-month mean; "
+        "the event range selects which month alerts appear. Thresholds require supervisor approval."
     )
 
     show_data(
         alert_table,
         "exception_alerts"
     )
+
+    with st.expander("Public synthetic scenario checks"):
+        if all_controls_selected and start == FIRST_DATE and end == AS_OF and set(selected_bands) == set(risk_bands):
+            scenario_checks = public_scenario_results(alert_table)
+            st.table(scenario_checks)
+            st.caption("Public set: six expected alerts and one expected non-alert. "
+                       "These checks do not assess every possible false alert and do not replace the private answer-key review.")
+        else:
+            st.caption("Reset control, risk-band and event-date filters to run the public baseline checks.")
+
 
 
 # ============================================================
